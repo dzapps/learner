@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" a href="cssp1.css">
+    </head>
+    <body>
+        <div class="d1" id="d1">
+            <p class="p1">Learn The English Letters</p>
+        </div>
+        <div class="d2" id=d2>
+            <span class="sp1"> Number Of Letters </span>
+                <input type="number" class="t1" id="t1" value= "">
+                <input type="submit" class="s1" id="s1" value="Generate">
+                <input type="submit" class="s1" id="s2" value="Show">
+        </div>
+        <div id="d3">
+        </div>
+        <div id="d4">
+            
+        </div>
+        <div id="d5">
+            <table id="tb">
+              <table>
+        </div>
+        
+    </body>
+    <script src="jquery-3.4.1.min.js"></script> 
+    <script>
+      //tamplate function
+      function store(type,target,time)
+      {
+       this.type=type;
+       this.target=target.toString();
+       this.time=time;
+       this.show=function()
+       {
+       var j= { "Type":this.type,"Target":this.target ,"Time":this.time};
+       return j;
+       }
+      }
+     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       
+
+     //localstorage for load
+        window.addEventListener("load",function(e){
+	      var loading1=new store(e.type,e.target,new Date());
+	      if(localStorage["load"]){
+		    var ar=JSON.parse(localStorage.getItem("load"));
+		    ar.push(loading1.show());
+		    localStorage.setItem("load",JSON.stringify(ar));
+	    	}
+		   else{
+         var ar=new Array();
+         ar.push(loading1.show());
+			 localStorage.setItem("load",JSON.stringify(ar));
+       }			
+       });
+       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       //this is get elemants
+        var boleans=[];
+        var char=["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"];  
+        var te=document.getElementsByTagName("input")[0];
+        var generate=document.getElementsByTagName("input")[1];
+        var d3=document.getElementById("d3");
+        var d4 =document.getElementById("d4");
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+                                                          // handling click of button generate 
+        generate.addEventListener("click",function(e)
+        {
+          for(var i=0;i<26;i++)boleans[i]=false;
+          d3.innerHTML="";
+          d4.innerHTML="";
+          var x=te.value;
+          //check if the input is null or >26 or <1
+          if (te.value==" ")
+          {
+            d4.innerHTML="";
+                 return ;
+          }
+         else if (x>26||x<1)
+         {
+           d4.innerHTML="";
+              return;
+         }
+         ///////////////////////////////////////////////////////////////////////
+         
+          else
+          {
+         //localstorage of generate
+            var lo=new store(e.type,e.target,new Date());
+            if(localStorage["generate"]){
+              var ar3=JSON.parse(localStorage.getItem("generate"));
+             ar3.push(lo.show());
+            localStorage.setItem("generate",JSON.stringify(ar3));
+            }
+
+            else
+            {
+              var ar3=new Array();
+              ar3.push(lo.show());
+            localStorage.setItem("generate",JSON.stringify(ar3));
+            }
+        /////////////////////////////////////////////////////////////////////////
+        
+        //create button
+            for(var i=0;i<x;i++)
+                {
+                    
+             var bu=document.createElement("button");
+              R=Math.floor(Math.random()*26);
+              while(boleans[R]){
+                R=Math.floor(Math.random()*26);   
+              }
+                boleans[R]=true;
+                var nod=document.createTextNode(char[R]);
+                bu.appendChild(nod);
+                d3.appendChild(bu);
+                bu.setAttribute("class","b1");
+        /////////////////////////////////////////////////////////////////////////
+
+                                                                 //handling click of "character button"
+                bu.addEventListener('click',function (e){
+           //localstorage of character button
+              var lolo=new store(e.type,e.target,new Date());
+              if(localStorage[e.target.textContent])
+              {
+              var ar4=JSON.parse(localStorage.getItem(e.target.textContent));
+              ar4.push(lolo.show());
+              localStorage.setItem(e.target.textContent,JSON.stringify(ar4));
+              }
+              else
+              {
+                var ar4=new Array();
+                ar4.push(lolo.show());
+              localStorage.setItem(e.target.textContent,JSON.stringify(ar4));
+              }
+          /////////////////////////////////////////////////////////////////////////
+          
+          //adding image 
+                  d4.innerHTML="";
+                  var img=document.createElement("img");
+                  img.setAttribute("class","images");
+                  img.setAttribute("src",this.textContent+".jpg");
+                  d4.appendChild(img);
+                });
+
+                
+                }
+          }
+        }
+        );
+        ////////////////////////////////////////////////////////////////////////////
+        
+        
+        
+        //localstorage of unload
+        window.addEventListener("unload",function(e){
+	      var loading2=new store(e.type,e.target,new Date());
+        if(localStorage["unload"])
+        {
+        var ar2=JSON.parse(localStorage.getItem("unload"));
+		    ar2.push(loading2.show());
+		    localStorage.setItem("unload",JSON.stringify(ar2));
+	    	}
+		   else
+         {
+         var ar=new Array();
+        ar.push(loading2.show());
+		  	localStorage.setItem("unload",JSON.stringify(ar));			
+         }
+        });
+        /////////////////////////////////////////////////////////////////////////////////////
+        setInterval(function(){
+        for(var i=0;i<localStorage.length;i++){
+        $.ajax({
+          "type":"post",
+          "url":"pro.php",
+          "data":{"ob":[localStorage[localStorage.key(i)],localStorage.key(i)]},
+          "success":function(r){
+            console.log(r);
+          }
+        });
+        }
+        localStorage.clear();
+        
+        },5000);
+        $("#s2").click(function(){
+          $.ajax({
+            "type":"get",
+            "url" :"pro.php",
+            "data":{"ob":""},
+            "success":function(r){
+              r=JSON.parse(r);
+              var s="<tr><th>Type</th><th>Target</th><th>Time</th><th>Event</th></tr>";
+              $.each(r,function(){
+              s+="<tr><td>"+this['Type']+"</td><td>"+this['Target']+"</td><td>"+this['time']+"</td><td>"+this['event']+"</td></tr>";
+              });
+              $("#tb").html(s);
+            }
+
+          })
+        });
+        ///////////////////////////////////////////////////////////////////////////////
+       //////////////////////////////////////////////////////////////////////////////////T H A N K S///////////////////////////////////////////////////////////////////////
+    </script>
+</html>
